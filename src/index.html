@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Usuários</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #f4f4f4;
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gerenciamento de Usuários</h1>
+
+  <!-- Formulário para criar novo usuário -->
+  <form id="userForm">
+    <h2>Novo Usuário</h2>
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="email" id="email" placeholder="E-mail" required>
+    <input type="date" id="data_nasc" placeholder="Data de Nascimento" required>
+    <input type="tel" id="fone" placeholder="Telefone" required>
+
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <!-- Formulário para atualizar novo usuário -->
+  <form id="userUpdateForm">
+    <h2>Atualizar Usuário</h2>
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="email" id="email" placeholder="E-mail" required>
+    <input type="date" id="data_nasc" placeholder="Data de Nascimento" required>
+    <input type="tel" id="fone" placeholder="Telefone" required>
+
+    <button type="submit">Atualizar</button>
+  </form>
+
+  <!-- Formulário para criar novo usuário -->
+  <form id="deleteForm">
+    <h2>Deletar Usuário</h2>
+    <input type="text" id="id" placeholder="Id do usuario" required>
+
+    <button type="submit">Deletar</button>
+  </form>
+
+  <!-- Lista de usuários vindos da API -->
+  <h2>Lista de Usuários</h2>
+  <ul id="userList">
+    <li>Carregando usuários...</li>
+  </ul>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/users';
+
+    // 1. Função para carregar e listar os usuários (GET)
+    async function carregarUsuarios() {
+      try {
+        const resposta = await fetch(API_URL);
+        const usuarios = await resposta.json();
+
+        const lista = document.getElementById('userList');
+        lista.innerHTML = '';
+
+        if (usuarios.length === 0) {
+          lista.innerHTML = '<li>Nenhum usuário cadastrado.</li>';
+          return;
+        }
+
+        usuarios.forEach(usuario => {
+          const item = document.createElement('li');
+          item.innerHTML = `<strong>${usuario.nome}</strong> - ${usuario.email}`;
+          lista.appendChild(item);
+        });
+      } catch (erro) {
+        console.error('Erro ao carregar usuários:', erro);
+        document.getElementById('userList').innerHTML = '<li>Erro ao carregar a lista.</li>';
+      }
+    }
+
+    document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('id').value;
+
+      try {
+        const resposta = await fetch(`${API_URL}/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (resposta.ok) {
+          alert('Usuário deletado com sucesso!');
+          carregarUsuarios(); // Atualiza a lista na tela
+        } else {
+          const erro = await resposta.json();
+          alert('Erro: ' + (erro.error || 'Falha ao deletar'));
+        }
+      } catch (erro) {
+        console.error('Erro ao deletar:', erro);
+        alert('Erro ao conectar com o servidor.');
+      }
+    }),
+
+    // 2. Função para cadastrar novo usuário (POST)
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const data_nasc = document.getElementById('data_nasc').value;
+      const fone = document.getElementById('fone').value;
+
+      try {
+        const resposta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nome, email, data_nasc, fone })
+        });
+
+        if (resposta.ok) {
+          alert('Usuário cadastrado com sucesso!');
+          document.getElementById('userForm').reset();
+          carregarUsuarios(); // Atualiza a lista na tela
+        } else {
+          const erro = await resposta.json();
+          alert('Erro: ' + (erro.error || 'Falha ao cadastrar'));
+        }
+      } catch (erro) {
+        console.error('Erro ao cadastrar:', erro);
+        alert('Erro ao conectar com o servidor.');
+      }
+    });
+ 
+
+    // Carrega a lista assim que a página abre
+    carregarUsuarios();
+  </script>
+
+</body>
+</html>
