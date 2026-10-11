@@ -63,6 +63,9 @@
     <input type="date" id="data_nasc" placeholder="Data de Nascimento" required>
     <input type="tel" id="fone" placeholder="Telefone" required>
 
+    <!-- Campo do tipo File para selecionar a foto -->
+    <input type="file" id="foto" accept="image/*" />
+
     <button type="submit">Cadastrar</button>
   </form>
 
@@ -109,9 +112,13 @@
         }
 
         usuarios.forEach(usuario => {
+          const imgElement = usuario.foto 
+            ? `<img src="http://localhost:3000/${usuario.foto}" width="50" height="50" style="border-radius:50%" />`
+            : `<img src="https://via.placeholder.com/50" width="50" height="50" />`;
+
           const item = document.createElement('li');
-          item.innerHTML = `<strong>${usuario.nome}</strong> - ${usuario.email}`;
-          lista.appendChild(item);
+          item.innerHTML = `${imgElement} <strong>${usuario.nome}</strong> - ${usuario.email}`;
+          document.getElementById('userList').appendChild(item);
         });
       } catch (erro) {
         console.error('Erro ao carregar usuários:', erro);
@@ -150,13 +157,19 @@
       const data_nasc = document.getElementById('data_nasc').value;
       const fone = document.getElementById('fone').value;
 
+      // 2. Anexa o arquivo selecionado (se houver)
+    const fotoInput = document.getElementById('foto');
+    if (fotoInput.files[0]) {
+      formData.append('foto', fotoInput.files[0]); // 'foto' é o nome esperado no upload.single('foto')
+    }
+
       try {
         const resposta = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ nome, email, data_nasc, fone })
+          body: JSON.stringify({ nome, email, data_nasc, fone, foto: fotoInput.files[0] ? fotoInput.files[0].name : null }) // Envia
         });
 
         if (resposta.ok) {

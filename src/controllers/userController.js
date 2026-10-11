@@ -20,8 +20,10 @@ export const getUserById = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    
-    const newUser = await userService.createNewUser(req.body);
+    const { nome, email, fone, data_nasc } = req.body;
+    const foto = req.file ? req.file.path : null; // Pega o caminho do arquivo
+
+    const newUser = await userService.createNewUser({ nome, email, fone, data_nasc, foto });
     res.status(201).json(newUser);
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -5,19 +5,21 @@ export const fetchAllUsers = async () => {
 };
 
 export const createNewUser = async (userData) => {
-  console.log('Request body:', userData); 
-  // Regra de negócio: validação básica
-  if (userData.email == "" || userData.name == "") {
+  const { nome, email, senha, foto } = userData;
+
+  // Validações de regra de negócio
+  if (!nome || !email) {
     throw new Error('Nome e e-mail são obrigatórios.');
   }
 
-  // Regra de negócio: verificar se e-mail já existe
-  const existingUser = await userModel.findByEmail(userData.email);
+  // Verifica se o e-mail já existe no banco
+  const existingUser = await userModel.findByEmail(email);
   if (existingUser) {
     throw new Error('Este e-mail já está em uso.');
   }
 
-  return await userModel.create(userData);
+  // Envia os dados completos para o Model
+  return await userModel.create({ nome, email, senha, foto });
 };
 
 export const getUserById = async (id) => {
@@ -39,4 +41,4 @@ export const updateUser = async (id, userData) => {
 
 export const deleteUser = async (id) => {
   return await userModel.deleteById(id);
-};
+}; 

@@ -17,14 +17,21 @@ export const findByEmail = async (email) => {
   return rows[0]; // Retorna apenas o usuário encontrado (ou undefined)
 };
 
-// Inserir um novo registro
 export const create = async (user) => {
-  const { nome, email, data_nasc, fone } = user;
+  const { nome, email, fone, data_nasc, foto } = user;
   const [result] = await db.query(
-    'INSERT INTO usuarios (nome, email, data_nasc, fone) VALUES (?, ?, ?, ?)',
-    [nome, email, data_nasc, fone]
+    'INSERT INTO usuarios (nome, email, fone, data_nasc, foto) VALUES (?, ?, ?, ?, ?)',
+    [nome, email, fone, data_nasc, foto]
   );
-  return { id: result.insertId, nome, email, data_nasc, fone };
+
+  return {
+    id: result.insertId,
+    nome,
+    email,
+    fone,
+    data_nasc,
+    foto
+  };
 };
 
 // Atualizar um registro existente
